@@ -7,7 +7,7 @@ import numpy as np
 import os
 import os.path
 import tables, warnings; warnings.filterwarnings('ignore', category=tables.NaturalNameWarning)
-import util
+import policyopt.util as util
 
 import theano
 from theano import tensor
@@ -47,8 +47,8 @@ class variable_scope(object):
         _curr_active_scope = self.parent
 
     def get_child_variables(self, trainable_only):
-        vs = [v for v, trainable in self.vars.itervalues() if (not trainable_only or trainable)]
-        for c in self.children.itervalues():
+        vs = [v for v, trainable in self.vars.values() if (not trainable_only or trainable)]
+        for c in self.children.values():
             vs += c.get_child_variables(trainable_only)
         return vs
 
@@ -78,7 +78,7 @@ def _hash_name2array(name2array):
     '''
     def hash_array(a):
         return '%.10f,%.10f,%d' % (np.mean(a), np.var(a), np.argmax(a))
-    return hashlib.sha1('|'.join('%s %s' for n, h in sorted([(name, hash_array(a)) for name, a in name2array]))).hexdigest()
+    return hashlib.sha1('|'.join('%s %s' for n, h in sorted([(name, hash_array(a)) for name, a in name2array])).encode('utf-8')).hexdigest()
 
 
 import abc
@@ -107,7 +107,7 @@ class Model(object):
 
     ### Utilities for getting/setting flattened parameter vectors ###
     def set_params(self, x):
-        # print 'setting param vars:\n{}'.format('\n'.join([v.name for v in self.get_trainable_variables()]))
+        print('setting param vars:\n{}'.format('\n'.join([v.name for v in self.get_trainable_variables()])))
         assert x.ndim == 1
         pos = 0
         for v in self.get_trainable_variables():
@@ -157,7 +157,7 @@ class Model(object):
 
             for v in self.get_all_variables():
                 assert v.name[0] == '/'; vname = v.name[1:]
-                print 'Reading', vname
+                print('Reading', vname)
                 if vname in dset:
                     v.set_value(dset[vname][...])
                 elif vname+':0' in dset:
@@ -168,7 +168,7 @@ class Model(object):
                     raise RuntimeError('Variable %s not found in %s' % (vname, dset))
 
             h = self.savehash()
-            assert h == dset.attrs['hash'], 'Checkpoint hash %s does not match loaded hash %s' % (dset.attrs['hash'], h)
+            assert h == dset.attrs['hash'].decode('utf-8'), 'Checkpoint hash %s does not match loaded hash %s' % (dset.attrs['hash'], h)
 
 
 # Layers for feedforward networks
@@ -265,7 +265,7 @@ class FeedforwardNet(Layer):
 
         layerspec = json.loads(layerspec_json)
         util.header('Loading feedforward net specification')
-        print json.dumps(layerspec, indent=2, separators=(',', ': '))
+        print(json.dumps(layerspec, indent=2, separators=(',', ': ')))
 
         self.layers = []
         with variable_scope(type(self).__name__) as self.__varscope:
@@ -319,10 +319,10 @@ def _printfields(fields, sep=' | ', width=8, precision=4, print_header=True):
                 raise NotImplementedError(typeinfo)
     if print_header:
         header = ((('{:^%d}' % width) + sep) * len(names))[:-len(sep)].format(*names)
-        print '-'*len(header)
-        print header
-        print '-'*len(header)
-    print sep.join(fmts).format(*vals)
+        print('-'*len(header))
+        print(header)
+        print('-'*len(header))
+    print(sep.join(fmts).format(*vals))
 
 def _type_to_col(t, pos):
     if t is int: return tables.Int32Col(pos=pos)
@@ -472,7 +472,7 @@ def test_standardizer():
     allx = np.concatenate([x_N_D, x2_N_D], axis=0)
     assert np.allclose(s._mean_1_D.get_value()[0,:], allx.mean(axis=0))
     assert np.allclose(s.get_stdev(), allx.std(axis=0))
-    print 'ok'
+    print('ok')
 
 if __name__ == '__main__':
     test_standardizer()

@@ -192,7 +192,7 @@ class BatchedSim(object):
     def reset_sim(self, idx): raise NotImplementedError
 
     def reset_all(self):
-        for i in xrange(len(self)):
+        for i in range(len(self)):
             self.reset_sim(i)
 
     def is_done(self, idx): raise NotImplementedError
@@ -219,7 +219,7 @@ class SequentialBatchedSim(BatchedSim):
     '''
     def __init__(self, mdp, batch_size):
         self.mdp = mdp
-        self.sims = [mdp.new_sim() for _ in xrange(batch_size)] # current active simulations
+        self.sims = [mdp.new_sim() for _ in range(batch_size)] # current active simulations
     def __len__(self): return len(self.sims)
     def reset_sim(self, idx): self.sims[idx] = self.mdp.new_sim()
     def is_done(self, idx): return self.sims[idx].done
@@ -228,7 +228,7 @@ class SequentialBatchedSim(BatchedSim):
     def batch_step(self, actions_B_Da, num_threads=None):
         assert actions_B_Da.shape[0] == len(self.sims)
         rewards_B = np.zeros(len(self.sims))
-        for i_sim in xrange(len(self.sims)):
+        for i_sim in range(len(self.sims)):
             rewards_B[i_sim] = self.sims[i_sim].step(actions_B_Da[i_sim,:])
         return rewards_B
 
@@ -258,7 +258,7 @@ class MDP(object):
         '''Simulate a single trajectory'''
         sim = self.new_sim(init_state=init_state)
         obs, obsfeat, actions, actiondists, rewards = [], [], [], [], []
-        for _ in xrange(max_traj_len):
+        for _ in range(max_traj_len):
             obs.append(sim.obs[None,...].copy())
             obsfeat.append(obsfeat_fn(obs[-1]))
             a, adist = policy_fn(obsfeat[-1])
@@ -296,12 +296,12 @@ class MDP(object):
 
         # Simulations and their current trajectories
         simbatch = self.new_batched_sim(cfg.batch_size) # TODO: reuse this across runs
-        sim_trans_B = [[] for _ in xrange(cfg.batch_size)] # list of (o,obsfeat,adist,a,r) transitions for each simulation
+        sim_trans_B = [[] for _ in range(cfg.batch_size)] # list of (o,obsfeat,adist,a,r) transitions for each simulation
 
         # Keep running simulations until we fill up the quota of trajectories and transitions
         while True:
             # If a simulation is done, pull out and save its trajectory, and restart it.
-            for i_sim in xrange(cfg.batch_size):
+            for i_sim in range(cfg.batch_size):
                 if simbatch.is_done(i_sim) or len(sim_trans_B[i_sim]) >= cfg.max_traj_len:
                     # Save the trajectory
                     completed_translists.append(sim_trans_B[i_sim])
@@ -328,7 +328,7 @@ class MDP(object):
             if no_reward: r_B[:] = np.nan
 
             # Save the transitions
-            for i_sim in xrange(cfg.batch_size):
+            for i_sim in range(cfg.batch_size):
                 sim_trans_B[i_sim].append((obs_B_Do[i_sim,:], obsfeat_B_Df[i_sim,:], adist_B_Pa[i_sim,:], a_B_Da[i_sim,:], r_B[i_sim]))
 
         assert sum(len(tlist) for tlist in completed_translists) == num_sa
@@ -400,7 +400,7 @@ class MDP(object):
 _global_sim_info = None
 def _rollout():
     try:
-        import os, random; random.seed(os.urandom(4)); np.random.seed(int(os.urandom(4).encode('hex'), 16))
+        import os, random; random.seed(os.urandom(4)); np.random.seed(int(os.urandom(4).hex(), 16))
         global _global_sim_info
         mdp, policy_fn, obsfeat_fn, max_traj_len = _global_sim_info
         return mdp.sim_single(policy_fn, obsfeat_fn, max_traj_len)

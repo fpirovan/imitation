@@ -5,7 +5,8 @@ import numpy as np
 import yaml
 import os, os.path, shutil
 from policyopt import util
-
+import theano
+theano.config.gcc.cxxflags = "-Wno-c++11-narrowing"
 
 
 # PBS
@@ -61,8 +62,8 @@ def runpbs(cmd_templates, outputfilenames, argdicts, jobname, queue, nodes, ppn,
         outputfiles.append(os.path.join(outputfile_dir, '{:04d}_{}'.format(i+1, outputfilenames[i])))
 
     script = create_pbs_script(cmds, outputfiles, jobname, queue, nodes, ppn)
-    print script
-    with tempfile.NamedTemporaryFile(suffix='.sh') as f:
+    print(script)
+    with tempfile.NamedTemporaryFile(suffix='.sh', mode='w') as f:
         f.write(script)
         f.flush()
 
@@ -72,15 +73,15 @@ def runpbs(cmd_templates, outputfilenames, argdicts, jobname, queue, nodes, ppn,
         else:
             cmd = 'qsub -t %d-%d %s' % (1, len(cmds), f.name)
 
-        print 'Running command:', cmd
-        print 'ok ({} jobs)? y/n'.format(num_cmds)
-        if raw_input() == 'y':
+        print('Running command:', cmd)
+        print('ok ({} jobs)? y/n'.format(num_cmds))
+        if input() == 'y':
             # Write a copy of the script
             if qsub_script_copy is not None:
                 assert not os.path.exists(qsub_script_copy)
                 with open(qsub_script_copy, 'w') as fcopy:
                     fcopy.write(script)
-                print 'qsub script written to {}'.format(qsub_script_copy)
+                print('qsub script written to {}'.format(qsub_script_copy))
             # Run qsub
             subprocess.check_call(cmd, shell=True)
 
@@ -97,14 +98,14 @@ def load_trained_policy_and_mdp(env_name, policy_state_str):
 
     # Load the saved state
     policy_file, policy_key = util.split_h5_name(policy_state_str)
-    print 'Loading policy parameters from %s in %s' % (policy_key, policy_file)
+    print('Loading policy parameters from %s in %s' % (policy_key, policy_file))
     with h5py.File(policy_file, 'r') as f:
         train_args = json.loads(f.attrs['args'])
 
     # Initialize the MDP
-    print 'Loading environment', env_name
+    print('Loading environment', env_name)
     mdp = rlgymenv.RLGymMDP(env_name)
-    print 'MDP observation space, action space sizes: %d, %d\n' % (mdp.obs_space.dim, mdp.action_space.storage_size)
+    print('MDP observation space, action space sizes: %d, %d\n' % (mdp.obs_space.dim, mdp.action_space.storage_size))
 
     # Initialize the policy
     nn.reset_global_scope()
@@ -154,9 +155,9 @@ def exec_saved_policy(env_name, policystr, num_trajs, deterministic, max_traj_le
 
     # Load MDP and policy
     mdp, policy, _ = load_trained_policy_and_mdp(env_name, policystr)
-    max_traj_len = min(mdp.env_spec.timestep_limit, max_traj_len) if max_traj_len is not None else mdp.env_spec.timestep_limit
+    max_traj_len = min(mdp.env_spec.max_episode_steps, max_traj_len) if max_traj_len is not None else mdp.env_spec.max_episode_steps
 
-    print 'Sampling {} trajs (max len {}) from policy {} in {}'.format(num_trajs, max_traj_len, policystr, env_name)
+    print('Sampling {} trajs (max len {}) from policy {} in {}'.format(num_trajs, max_traj_len, policystr, env_name))
 
     # Sample trajs
     trajbatch = mdp.sim_mp(
@@ -207,10 +208,10 @@ def phase0_sampletrajs(spec, specfilename):
         avgr = trajbatch.r.stacked.mean()
         lengths = np.array([len(traj) for traj in trajbatch])
         ent = policy._compute_actiondist_entropy(trajbatch.adist.stacked).mean()
-        print 'ret: {} +/- {}'.format(returns.mean(), returns.std())
-        print 'avgr: {}'.format(avgr)
-        print 'len: {} +/- {}'.format(lengths.mean(), lengths.std())
-        print 'ent: {}'.format(ent)
+        print('ret: {} +/- {}'.format(returns.mean(), returns.std()))
+        print('avgr: {}'.format(avgr))
+        print('len: {} +/- {}'.format(lengths.mean(), lengths.std()))
+        print('ent: {}'.format(ent))
 
         # Save the trajs to a file
         with h5py.File(taskname2outfile[task['name']], 'w') as f:
@@ -288,10 +289,10 @@ def phase2_eval(spec, specfilename):
     # This is where model logs are stored.
     # We will also store the evaluation here.
     checkptdir = os.path.join(spec['options']['storagedir'], spec['options']['checkpt_subdir'])
-    print 'Evaluating results in {}'.format(checkptdir)
+    print('Evaluating results in {}'.format(checkptdir))
 
     results_full_path = os.path.join(checkptdir, spec['options']['results_filename'])
-    print 'Will store results in {}'.format(results_full_path)
+    print('Will store results in {}'.format(results_full_path))
     if os.path.exists(results_full_path):
         raise RuntimeError('Results file {} already exists'.format(results_full_path))
 
@@ -313,7 +314,7 @@ def phase2_eval(spec, specfilename):
                     evals_to_do.append((task, alg, num_trajs, run, checkptfile))
 
     if nonexistent_checkptfiles:
-        print 'Cannot find checkpoint files:\n', '\n'.join(nonexistent_checkptfiles)
+        print('Cannot find checkpoint files:\n', '\n'.join(nonexistent_checkptfiles))
         raise RuntimeError
 
     # Walk through all saved checkpoints
@@ -383,8 +384,8 @@ def main():
     }
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('spec', type=str)
-    parser.add_argument('phase', choices=sorted(phases.keys()))
+    parser.add_argument('--spec', type=str, default="/Users/fedepiro/Projects/GAIL/pipelines/im_pipeline.yaml")
+    parser.add_argument('--phase', choices=sorted(phases.keys()), default="0_sampletrajs")
     args = parser.parse_args()
 
     with open(args.spec, 'r') as f:

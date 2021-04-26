@@ -24,4 +24,4 @@ for n in names:
         ocont = False
         osize = ospace.n
 
-    print '{} & {} ({}) & {} ({}) \\\\'.format(n, osize, 'continuous' if ocont else 'discrete', asize, 'continuous' if acont else 'discrete')
+    # print '{} & {} ({}) & {} ({}) \\\\'.format(n, osize, 'continuous' if ocont else 'discrete', asize, 'continuous' if acont else 'discrete')

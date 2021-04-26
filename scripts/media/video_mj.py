@@ -26,11 +26,11 @@ def main():
 
     util.mkdir_p(args.output_dir)
     assert not os.listdir(args.output_dir), '%s is not empty' % args.output_dir
-    print 'Writing to', args.output_dir
+    # print 'Writing to', args.output_dir
 
     # Load the saved state
     policy_file, policy_key = util.split_h5_name(args.policy)
-    print 'Loading policy parameters from %s in %s' % (policy_key, policy_file)
+    # print 'Loading policy parameters from %s in %s' % (policy_key, policy_file)
     with h5py.File(policy_file, 'r') as f:
         train_args = json.loads(f.attrs['args'])
         dset = f[policy_key]
@@ -39,7 +39,7 @@ def main():
 
     # Initialize the MDP
     env_name = train_args['env_name'] if args.env_name is None else args.env_name
-    print 'Loading environment', env_name
+    # print 'Loading environment', env_name
     mdp = rlgymenv.RLGymMDP(env_name)
     util.header('MDP observation space, action space sizes: %d, %d\n' % (mdp.obs_space.dim, mdp.action_space.storage_size))
 
@@ -76,7 +76,7 @@ def main():
             image = np.fromstring(data, dtype='uint8').reshape(h, w, 3)[::-1,:,:]
             cv2.imwrite('%s/img_%08d.png' % (args.output_dir, steps), image[:,:,::-1])
 
-            print steps
+            # print steps
             steps += 1
 
             if steps >= args.max_steps:
