@@ -384,8 +384,8 @@ def main():
     }
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--spec', type=str, default="/Users/fedepiro/Projects/GAIL/pipelines/im_pipeline.yaml")
-    parser.add_argument('--phase', choices=sorted(phases.keys()), default="0_sampletrajs")
+    parser.add_argument('--spec', type=str, default="/Users/fedepiro/Projects/GAIL/pipelines/test.yaml")
+    parser.add_argument('--phase', choices=sorted(phases.keys()), default="2_eval")
     args = parser.parse_args()
 
     with open(args.spec, 'r') as f:

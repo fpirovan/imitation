@@ -10,6 +10,8 @@ OBSNORM_MODES = ('none', 'expertdata', 'online')
 TINY_ARCHITECTURE = '[{"type": "fc", "n": 64}, {"type": "nonlin", "func": "tanh"}, {"type": "fc", "n": 64}, {"type": "nonlin", "func": "tanh"}]'
 SIMPLE_ARCHITECTURE = '[{"type": "fc", "n": 100}, {"type": "nonlin", "func": "tanh"}, {"type": "fc", "n": 100}, {"type": "nonlin", "func": "tanh"}]'
 
+import pybullet_envs
+
 def load_dataset(filename, limit_trajs, data_subsamp_freq):
     # Load expert data
     with h5py.File(filename, 'r') as f:
@@ -52,11 +54,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', choices=MODES, default="ga")
     # Expert dataset
-    parser.add_argument('--data', type=str, default="/Users/fedepiro/Projects/GAIL/scripts/imitation_runs/modern_stochastic/trajs/trajs_hopper.h5")
+    parser.add_argument('--data', type=str, default="/Users/fedepiro/Projects/GAIL/scripts/imitation_runs/modern_stochastic/trajs/trajs_HalfCheetahBulletEnv-v0.h5")
     parser.add_argument('--limit_trajs', type=int, default=1)
     parser.add_argument('--data_subsamp_freq', type=int, default=20)
     # MDP options
-    parser.add_argument('--env_name', type=str, default="Hopper-v2")
+    parser.add_argument('--env_name', type=str, default="HalfCheetahBulletEnv-v0")
     parser.add_argument('--max_traj_len', type=int, default=None)
     # Policy architecture
     parser.add_argument('--policy_hidden_spec', type=str, default=SIMPLE_ARCHITECTURE)
@@ -72,7 +74,7 @@ def main():
     # Imitation optimizer
     parser.add_argument('--discount', type=float, default=.995)
     parser.add_argument('--lam', type=float, default=.97)
-    parser.add_argument('--max_iter', type=int, default=1000000)
+    parser.add_argument('--max_iter', type=int, default=1)
     parser.add_argument('--policy_max_kl', type=float, default=.01)
     parser.add_argument('--policy_cg_damping', type=float, default=.1)
     parser.add_argument('--no_vf', type=int, default=0)
@@ -87,13 +89,13 @@ def main():
     parser.add_argument('--reward_ent_reg_weight', type=float, default=.001)
     parser.add_argument('--reward_include_time', type=int, default=0)
     parser.add_argument('--sim_batch_size', type=int, default=None)
-    parser.add_argument('--min_total_sa', type=int, default=50000)
+    parser.add_argument('--min_total_sa', type=int, default=1)
     parser.add_argument('--favor_zero_expert_reward', type=int, default=0)
     # Saving stuff
     parser.add_argument('--print_freq', type=int, default=1)
     parser.add_argument('--save_freq', type=int, default=20)
     parser.add_argument('--plot_freq', type=int, default=0)
-    parser.add_argument('--log', type=str, required=False)
+    parser.add_argument('--log', type=str, required=False, default="/Users/fedepiro/Projects/GAIL/scripts/logs/trajs_HalfCheetahBulletEnv-v0.h5")
 
     args = parser.parse_args()
 

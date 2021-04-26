@@ -259,7 +259,7 @@ class MDP(object):
         sim = self.new_sim(init_state=init_state)
         obs, obsfeat, actions, actiondists, rewards = [], [], [], [], []
         for _ in range(max_traj_len):
-            obs.append(sim.obs[None,...].copy())
+            obs.append(sim.obs.copy())
             obsfeat.append(obsfeat_fn(obs[-1]))
             a, adist = policy_fn(obsfeat[-1])
             actions.append(a)
@@ -270,7 +270,7 @@ class MDP(object):
         obsfeat_T_Df = np.concatenate(obsfeat); assert obsfeat_T_Df.shape[0] == len(obs)
         adist_T_Pa = np.concatenate(actiondists); assert adist_T_Pa.ndim == 2 and adist_T_Pa.shape[0] == len(obs)
         a_T_Da = np.concatenate(actions); assert a_T_Da.shape == (len(obs), self.action_space.storage_size)
-        r_T = np.asarray(rewards); assert r_T.shape == (len(obs),)
+        r_T = np.asarray(rewards).squeeze(); assert r_T.shape == (len(obs),)
         return Trajectory(obs_T_Do, obsfeat_T_Df, adist_T_Pa, a_T_Da, r_T)
 
     # @profile

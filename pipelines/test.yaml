@@ -1,0 +1,41 @@
+tasks:
+  - name: HalfCheetahBulletEnv-v0
+    env: HalfCheetahBulletEnv-v0
+    policy: /Users/fedepiro/Projects/GAIL/expert_policies/modern/log_Hopper-v0_3.h5/snapshots/iter0000500
+    data_subsamp_freq: 20
+    cuts_off_on_success: false
+
+training:
+  full_dataset_num_trajs: 1
+  dataset_num_trajs: [4]
+  deterministic_expert: false
+  runs: 1
+
+  algorithms:
+    - name: ga
+      cmd: >
+        python scripts/imitate_mj.py --mode ga
+        --env {env}
+        --data {dataset}
+        --limit_trajs {num_trajs}
+        --data_subsamp_freq {data_subsamp_freq}
+        --favor_zero_expert_reward {cuts_off_on_success}
+        --min_total_sa 1
+        --max_iter 501
+        --reward_include_time 0
+        --reward_lr .01
+        --log {out}
+
+
+options:
+  storagedir: imitation_runs/modern_stochastic
+  traj_subdir: trajs
+  checkpt_subdir: logs
+
+  eval_num_trajs: 1
+  results_filename: results.h5
+
+  pbs:
+    jobname: im_modern
+    queue: atlas
+    ppn: 12
