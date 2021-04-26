@@ -1,2 +1,3 @@
-/scripts/imitation_runs/
-/scripts/imitation_runs/modern_stochastic/logs/
+/imitation_runs/
+/imitation_runs/logs/
+/imitation_runs/
