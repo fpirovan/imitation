@@ -54,7 +54,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', choices=MODES, default="ga")
     # Expert dataset
-    parser.add_argument('--data', type=str, default="./imitation_runs/trajs/trajs_HalfCheetahBulletEnv-v0.h5")
+    parser.add_argument('--data', type=str, default="../imitation_runs/trajs/trajs_HalfCheetahBulletEnv-v0.h5")
     parser.add_argument('--limit_trajs', type=int, default=1)
     parser.add_argument('--data_subsamp_freq', type=int, default=20)
     # MDP options
@@ -95,7 +95,7 @@ def main():
     parser.add_argument('--print_freq', type=int, default=1)
     parser.add_argument('--save_freq', type=int, default=20)
     parser.add_argument('--plot_freq', type=int, default=0)
-    parser.add_argument('--log', type=str, required=False, default="./logs/HalfCheetahBulletEnv-v0.h5")
+    parser.add_argument('--log', type=str, required=False, default="../logs/HalfCheetahBulletEnv-v0.h5")
 
     args = parser.parse_args()
 
