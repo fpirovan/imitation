@@ -10,6 +10,15 @@ OBSNORM_MODES = ('none', 'expertdata', 'online')
 TINY_ARCHITECTURE = '[{"type": "fc", "n": 64}, {"type": "nonlin", "func": "tanh"}, {"type": "fc", "n": 64}, {"type": "nonlin", "func": "tanh"}]'
 SIMPLE_ARCHITECTURE = '[{"type": "fc", "n": 100}, {"type": "nonlin", "func": "tanh"}, {"type": "fc", "n": 100}, {"type": "nonlin", "func": "tanh"}]'
 
+def reproducibility_setup(seed=0):
+    import random
+    random.seed(seed)
+
+    import numpy as np
+    np.random.seed(seed)
+
+reproducibility_setup()
+
 import pybullet_envs
 
 def load_dataset(filename, limit_trajs, data_subsamp_freq):

@@ -9,6 +9,16 @@ import theano
 theano.config.gcc.cxxflags = "-Wno-c++11-narrowing"
 
 
+def reproducibility_setup(seed=0):
+    import random
+    random.seed(seed)
+
+    import numpy as np
+    np.random.seed(seed)
+
+reproducibility_setup()
+
+
 # PBS
 import subprocess, tempfile, datetime
 def create_pbs_script(commands, outputfiles, jobname, queue, nodes, ppn):
