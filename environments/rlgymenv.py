@@ -113,8 +113,8 @@ def load_saved_hyperparams(stats_path, norm_reward=False):
 
 class RLGymSim(policyopt.Simulation):
     def __init__(self, env_name):
-        # expert_dir = pjoin("/cluster/home/fpirovan/topographic-nn/environments", "experts", env_name)
-        expert_dir = pjoin("/Users/fedepiro/Projects/topographic-nn/environments", "experts", env_name)
+        expert_dir = pjoin("/cluster/home/fpirovan/topographic-nn/environments", "experts", env_name)
+        # expert_dir = pjoin("/Users/fedepiro/Projects/topographic-nn/environments", "experts", env_name)
         stats_dir = pjoin(expert_dir, env_name)
         hyperparams = load_saved_hyperparams(stats_dir)
         self.env = create_zoo_env(env_name, stats_dir, hyperparams)
